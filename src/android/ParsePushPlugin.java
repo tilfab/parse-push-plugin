@@ -1,6 +1,6 @@
 package com.phonegap.parsepushplugin;
 
-import java.util.List;
+import java.util.*;
 import java.lang.Exception;
 
 import org.apache.cordova.CallbackContext;
@@ -23,6 +23,7 @@ public class ParsePushPlugin extends CordovaPlugin {
     public static final String ACTION_GET_SUBSCRIPTIONS = "getSubscriptions";
     public static final String ACTION_SUBSCRIBE = "subscribe";
     public static final String ACTION_UNSUBSCRIBE = "unsubscribe";
+    public static final String ACTION_UNSUBSCRIBEFROMALL = "unsubscribeFromAll";
 
     private static String gECB;
     private static CordovaWebView gWebView;
@@ -55,6 +56,10 @@ public class ParsePushPlugin extends CordovaPlugin {
         }
         if (action.equals(ACTION_UNSUBSCRIBE)) {
             this.unsubscribe(args.getString(0), callbackContext);
+            return true;
+        }
+        if (action.equals(ACTION_UNSUBSCRIBEFROMALL)) {
+            this.unsubscribeFromAll(callbackContext);
             return true;
         }
         return false;
@@ -121,6 +126,14 @@ public class ParsePushPlugin extends CordovaPlugin {
 
     private void unsubscribe(final String channel, final CallbackContext callbackContext) {
     	ParsePush.unsubscribeInBackground(channel);
+        callbackContext.success();
+    }
+
+    private void unsubscribeFromAll(final CallbackContext callbackContext) {
+        ParseInstallation install = ParseInstallation.getCurrentInstallation();
+        install.remove("channels");
+        install.put("channels", Arrays.asList(""));
+        install.saveInBackground();
         callbackContext.success();
     }
 
