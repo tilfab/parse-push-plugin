@@ -23,11 +23,11 @@ public class ParsePushPlugin extends CordovaPlugin {
     public static final String ACTION_GET_SUBSCRIPTIONS = "getSubscriptions";
     public static final String ACTION_SUBSCRIBE = "subscribe";
     public static final String ACTION_UNSUBSCRIBE = "unsubscribe";
-    
+
     private static String gECB;
     private static CordovaWebView gWebView;
     private static boolean gForeground = false;
-    
+
     public static final String LOGTAG = "ParsePushPlugin";
 
     @Override
@@ -63,7 +63,7 @@ public class ParsePushPlugin extends CordovaPlugin {
     private void registerDevice(final CallbackContext callbackContext, final JSONArray args) {
     	try {
         	JSONObject jo = args.getJSONObject(0);
-        	
+
             if(!jo.optString("appId").isEmpty() && !jo.optString("clientKey").isEmpty()){
             	// To quickly test if application is properly setup for push notification, user can
             	// initialize Parse via the register() function in this plugin's js api by
@@ -74,11 +74,11 @@ public class ParsePushPlugin extends CordovaPlugin {
                 Parse.initialize(cordova.getActivity(), jo.optString("appId"), jo.optString("clientKey"));
                 ParseInstallation.getCurrentInstallation().saveInBackground();
             }
-            
+
             //
             // register javascript event callbacks for notification events
             gECB = jo.optString("ecb");
-            
+
             callbackContext.success();
         } catch (JSONException e) {
             callbackContext.error("JSONException: " + e.toString());
@@ -123,7 +123,7 @@ public class ParsePushPlugin extends CordovaPlugin {
     	ParsePush.unsubscribeInBackground(channel);
         callbackContext.success();
     }
-    
+
     /*
     * Use the cordova bridge to call the jsCB and pass it _json as param
     */
@@ -132,26 +132,26 @@ public class ParsePushPlugin extends CordovaPlugin {
     }
     public static void javascriptECB(JSONObject _json, String pushAction){
     	boolean isOkAction = pushAction == "RECEIVE" || pushAction == "OPEN";
-    	
+
     	if( isJavascriptReady() && isOkAction ){
     		String snippet = "javascript:" + gECB + "(" + _json.toString() + ",'" + pushAction + "'" + ")";
-    		
+
     		//Log.d(LOGTAG, "javascriptECB snippet " + snippet);
     		gWebView.sendJavascript(snippet);
     	}
     }
-    
+
     public static boolean isJavascriptReady(){
     	return gECB != null && !gECB.isEmpty() && gWebView != null;
     }
-    
+
     @Override
     protected void pluginInitialize() {
     	gECB = null;
-    	gWebView = this.webView;  
+    	gWebView = this.webView;
     	gForeground = true;
     }
-    
+
     @Override
     public void onPause(boolean multitasking) {
         super.onPause(multitasking);
@@ -163,17 +163,17 @@ public class ParsePushPlugin extends CordovaPlugin {
         super.onResume(multitasking);
         gForeground = true;
     }
-    
-    
+
+
     @Override
     public void onDestroy() {
     	gECB = null;
     	gWebView = null;
     	gForeground = false;
-    	
+
     	super.onDestroy();
     }
-    
+
     public static boolean isInForeground(){
       return gForeground;
     }
